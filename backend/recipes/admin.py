@@ -18,29 +18,6 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    """ Админка для модели Recipe. """
-    list_display = ('name', 'author',
-                    'get_total_favorite_count', 'get_ingredients')
-    list_filter = ('author', 'name', 'tags')
-    filter_horizontal = ('ingredients', 'tags')
-
-    def get_total_favorite_count(self, obj):
-        """ Получает общее количество избранных рецептов. """
-        return obj.favoriting.count()
-
-    get_total_favorite_count.short_description = 'Избранное'
-
-    def get_ingredients(self, object):
-        """ Получает ингредиент или список ингредиентов рецепта. """
-        return '\n'.join(
-            (ingredient.name for ingredient in object.ingredients.all())
-        )
-
-    get_ingredients.short_description = 'Ингредиенты'
-
-
 @admin.register(RecipeIngredient)
 class RecipeIngredientAdmin(admin.ModelAdmin):
     """ Админика для модели RecipeIngredient. """
@@ -56,4 +33,18 @@ class ShoppingcartAdmin(admin.ModelAdmin):
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     """ Админка для модели FavoriteRecipe. """
-    list_display = ('user', 'recipe', 'added_at')
+    list_display = ('user', 'recipe')
+
+
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    """ Админка для модели Recipe. """
+    list_display = ('name', 'author',
+                    'get_favorite_count')
+    list_filter = ('author', 'name', 'tags')
+
+    def get_favorite_count(self, obj):
+        """ Получает общее количество избранных рецептов. """
+        return obj.favoriting.count()
+
+    get_favorite_count.short_description = 'Избранное'

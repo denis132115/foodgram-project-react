@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from users.models import CustomUser
@@ -8,7 +9,7 @@ class Tag(models.Model):
     name = models.CharField(
         max_length=50,
         unique=True, blank=False,
-        null=False, verbose_name='Название')
+        verbose_name='Имя тега')
     color = models.CharField(
         max_length=7, blank=False,
         null=False,
@@ -16,10 +17,10 @@ class Tag(models.Model):
     slug = models.SlugField(
         unique=True, blank=False,
         null=False,
-        verbose_name='Slug')
+        verbose_name='ID')
 
     def __str__(self):
-        return self.name
+        return self.slug
 
     class Meta:
         verbose_name = 'Тег'
@@ -28,7 +29,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
-    """ Модель для ингредиентов рецептов. """
+    """ Модель для ингредиентов. """
     name = models.CharField(
         max_length=100, blank=False,
         null=False,
@@ -39,7 +40,7 @@ class Ingredient(models.Model):
         verbose_name='Единицы измерения')
 
     def __str__(self):
-        return self.name
+        return f'{self.name}, {self.measurement_unit}'
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -48,7 +49,7 @@ class Ingredient(models.Model):
 
 
 class Recipe(models.Model):
-    """ Модель для рецептов блюд. """
+    """ Модель для рецептов. """
     author = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, blank=False,
         related_name='recipes',
@@ -61,7 +62,7 @@ class Recipe(models.Model):
     image = models.ImageField(
         upload_to='recipes/', blank=False,
         null=False,
-        verbose_name='Картинка')
+        verbose_name='Фото')
     text = models.TextField(
         blank=False,
         null=False,
@@ -96,14 +97,12 @@ class RecipeIngredient(models.Model):
         Recipe, on_delete=models.CASCADE, verbose_name='Рецепт')
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиент')
-    amount = models.DecimalField(
-        max_digits=6, decimal_places=2, verbose_name='Количество')
-
-    def __str__(self):
-        return (
-            f' {self.amount} {self.ingredient}'
-            f' для {self.recipe}'
-        )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+        validators=[
+            MinValueValidator(1, message='Количество не может быть меньше 1'),
+        ]
+    )
 
     class Meta:
         verbose_name = 'Ингредиент для рецепта'
@@ -116,13 +115,13 @@ class ShoppingCart(models.Model):
     user = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
+        related_name='shopping_user',
         verbose_name='Пользователь'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
+        related_name='shopping_recipe',
         verbose_name='Рецепт'
     )
 
@@ -150,11 +149,7 @@ class Favorite(models.Model):
         Recipe,
         on_delete=models.CASCADE,
         related_name='favoriting',
-        verbose_name='Рецепт'
-    )
-    added_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата добавления'
+        verbose_name='Избранный рецепт'
     )
 
     class Meta:
@@ -163,4 +158,4 @@ class Favorite(models.Model):
         verbose_name_plural = 'Избранные рецепты'
 
     def __str__(self):
-        return f'{self.user.username} - {self.recipe.name}'
+        return f'{self.user} - {self.recipe}'
