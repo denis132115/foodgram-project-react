@@ -27,8 +27,7 @@ class RecipeFilter(filters.FilterSet):
         if value:
             if self.request.GET.get('is_in_shopping_cart'):
                 return queryset.filter(shopping_recipe__user=user)
-            else:
-                return queryset.filter(favoriting__user=user)
+            return queryset.filter(favoriting__user=user)
         return queryset
 
     class Meta:

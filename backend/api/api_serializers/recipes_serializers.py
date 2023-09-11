@@ -6,6 +6,9 @@ from api.api_serializers.users_serializers import CustomUserSerializer
 from recipes.models import (Tag, Ingredient, Recipe,
                             RecipeIngredient, ShoppingCart)
 
+AMOUNT_MIN = 1
+AMOUNT_MAX = 32000
+
 
 class TagSerializer(serializers.ModelSerializer):
     """ Сериализатор для тегов. """
@@ -54,7 +57,8 @@ class RecipeIngredientCreateSerializer(serializers.ModelSerializer):
 
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     amount = serializers.IntegerField(required=True, write_only=True,
-                                      min_value=1,)
+                                      min_value=AMOUNT_MIN,
+                                      max_value=AMOUNT_MAX)
 
     class Meta:
         model = RecipeIngredient
@@ -98,6 +102,9 @@ class RecipeSerializer(serializers.ModelSerializer):
                                              source='recipeingredient_set')
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    cooking_time = serializers.IntegerField(
+        min_value=AMOUNT_MIN,
+        max_value=AMOUNT_MAX)
 
     def get_is_favorited(self, obj):
         """ Проверяет, добавлен ли рецепт в избанное. """
@@ -161,15 +168,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             author=author,
             **validated_data
         )
-
-        for ingredient_data in ingredients_data:
-            ingredient_id = ingredient_data.get('id')
-            amount = ingredient_data.get('amount')
-            RecipeIngredient.objects.create(
-                ingredient=ingredient_id,
-                recipe=recipe,
-                amount=amount
-            )
 
         self.create_recipe_ingredients(ingredients_data, recipe)
 

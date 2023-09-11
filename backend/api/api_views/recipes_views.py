@@ -81,8 +81,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ).values('ingredient__name', 'ingredient__measurement_unit',
                      ).order_by('ingredient__name').annotate(
                          ingredient_amount=Sum('amount')))
-        pdf_response = create_shopping_cart(recipe_ingredients_query)
-        return pdf_response
+        return create_shopping_cart(recipe_ingredients_query)
 
     @action(detail=True, methods=['post', 'delete'], url_path='favorite',
             url_name='favorite', permission_classes=(
@@ -91,20 +90,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """ Позволяет пользователю добавлять рецепты в избранное. """
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
+        data = {
+            'user': user.pk,
+            'recipe': recipe.pk
+        }
 
         if request.method == 'POST':
             favorite, created = Favorite.objects.get_or_create(user=user,
                                                                recipe=recipe)
             if created:
-                return Response({}, status=status.HTTP_201_CREATED)
-            else:
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(data, status=status.HTTP_201_CREATED)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         if request.method == 'DELETE':
-            try:
-                favorite_recipe = Favorite.objects.get(user=user,
-                                                       recipe=recipe)
-                favorite_recipe.delete()
-                return Response(status=status.HTTP_204_NO_CONTENT)
-            except Favorite.DoesNotExist:
-                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            favorite_recipe = get_object_or_404(Favorite,
+                                                user=user, recipe=recipe)
+            favorite_recipe.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)

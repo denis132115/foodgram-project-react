@@ -72,6 +72,7 @@ class AuthorSubscription(models.Model):
         unique_together = ('author', 'subscriber')
         verbose_name = 'Подписка на автора'
         verbose_name_plural = 'Подписки на авторов'
+        ordering = ['-author_id']
 
     def __str__(self):
         return f'{self.subscriber} подписан на {self.author}'

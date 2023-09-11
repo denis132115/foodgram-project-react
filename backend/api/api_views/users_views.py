@@ -21,7 +21,7 @@ class CustomUserViewSet(UserViewSet):
 
     @action(detail=False, methods=['get', 'patch'],
             url_path='my-profile', url_name='my-profile')
-    def my_profile(self, request):
+    def profile(self, request):
         if request.method == 'PATCH':
             useer_serializer = CustomUserSerializer(
                 request.user, data=request.data,
@@ -57,7 +57,7 @@ class CustomUserViewSet(UserViewSet):
             return Response(
                 user_serializer.data, status=status.HTTP_201_CREATED
             )
-        elif request.method == 'DELETE':
+        if request.method == 'DELETE':
             subscription_object = get_object_or_404(
                 AuthorSubscription, subscriber=user, author=content_author
             )

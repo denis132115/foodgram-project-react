@@ -4,6 +4,11 @@ from .models import (Tag, Ingredient, Recipe, RecipeIngredient,
                      ShoppingCart, Favorite)
 
 
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
+    extra = 1
+
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     """ Админка для модели Tag. """
@@ -42,6 +47,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'author',
                     'get_favorite_count')
     list_filter = ('author', 'name', 'tags')
+    inlines = (RecipeIngredientInline,)
 
     def get_favorite_count(self, obj):
         """ Получает общее количество избранных рецептов. """
