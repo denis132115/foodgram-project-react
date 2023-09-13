@@ -99,7 +99,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(many=True, read_only=True,
-                                             source='recipeingredient_set')
+                                             source='ingredients_list')
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
     cooking_time = serializers.IntegerField(
@@ -185,7 +185,7 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         instance.tags.set(tags_data)
 
         ingredients_data = validated_data.get('ingredients')
-        RecipeIngredient.objects.filter(recipe=instance).delete()
+        instance.ingredients_list.all().delete()
         self.create_recipe_ingredients(ingredients_data, instance)
 
         instance.save()

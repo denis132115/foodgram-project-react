@@ -91,8 +91,9 @@ class Recipe(models.Model):
 
 class RecipeIngredient(models.Model):
     """ Модель связи рецептов и ингредиентов. """
-    recipe = models.ForeignKey(
-        Recipe, on_delete=models.CASCADE, verbose_name='Рецепт')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='ingredients_list',
+                               verbose_name='Рецепт',)
     ingredient = models.ForeignKey(
         Ingredient, on_delete=models.CASCADE, verbose_name='Ингредиент')
     amount = models.PositiveSmallIntegerField(

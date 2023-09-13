@@ -61,8 +61,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                                recipe=recipe)
             status_code = status.HTTP_201_CREATED
         else:
-            ShoppingCart.objects.filter(user=request.user,
-                                        recipe=recipe).delete()
+            request.user.shopping_user.filter(recipe=recipe).delete()
             status_code = status.HTTP_204_NO_CONTENT
 
         shopping_cart_serializer = RecipeShortSerializer(recipe)
